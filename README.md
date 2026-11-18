@@ -96,16 +96,27 @@ A estrutura de pacotes abaixo é uma proposta inicial e poderá ser atualizada d
 ```text
 Money-Buu/
 ├── docs/
-│   ├── uml/
-│   └── prototipos/
+│   ├──Apresentação
+│   ├── Relatório
+│   └── UML
 ├── src/
-│   └── main/
-│       └── java/
-│           └── moneybuu/
-│               ├── modelo/
-│               ├── arquivo/
-│               ├── gui/
-│               └── app/
+│   └── Main.java
+│   ├── modelo/
+│       ├── Conta.java
+│       ├── Transacao.java
+│       ├── Transferência.java
+│       ├── Receita.java
+│       ├── Despesa.java
+│       ├── Relatorio.java
+│       ├── Categoria.java
+│       ├── Moeda.java
+│       ├── Envelope.java
+│   ├── excecoes/
+│       ├── ContaNaoEncontradaException.java
+│       ├── SaldoInsuficienteException.java
+│       ├── TransacaoNaoEcontradaException.java
+│       ├── ValorInvalidoException.java
+│       ├── TransferenciaInvalidaException.java
 ├── README.md
 └── .gitignore
 ```
@@ -121,11 +132,12 @@ Money-Buu/
 | Entrega | Descrição | Prazo |
 |---|---|---|
 | 1 | Modelagem UML, relacionamentos, armazenamento e protótipos | 06/11/2026 |
-| 2 | Implementação das classes e regras de negócio | 13/11/2026 |
-| 3 | Persistência dos dados e funcionalidades principais | 30/11/2026 |
-| 4 | Aplicação completa, documentação e apresentação | 09/12/2026 |
+| 2 | Implementação das classes e regras de negócio | 19/11/2026 |
+| 3 | Persistência dos dados e funcionalidades principais | 27/11/2026 |
+| 4 | Aplicação completa, documentação e apresentação | 27/12/2026 |
 
-**Etapa atual:** Entrega 1 — Modelagem.
+**Etapa Realizada:** Entrega 1 — Modelagem.
+**Etapa Atual:** Entrega 2 - Núcleo do domínio;
 
 ## 👥 Equipe
 
