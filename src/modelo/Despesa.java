@@ -1,58 +1,27 @@
+package modelo;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class Despesa {
-    private int id;
-    private LocalDate data;
-    private BigDecimal valor;
-    private String descricao;
-    private Categoria categoria; // Relação: Uma despesa tem uma categoria
 
-    public Despesa(int id, LocalDate data, BigDecimal valor, String descricao, Categoria categoria) {
-        this.id = id;
-        this.data = data;
-        this.valor = valor;
-        this.descricao = descricao;
-        this.categoria = categoria;
+public class Despesa extends Transacao {
+
+    public Despesa(int id, LocalDate data, BigDecimal valor,
+                   String descricao, Categoria categoria) {
+        super(id, data, valor, descricao, categoria);
     }
 
-    public int getId() {
-        return id;
+    @Override
+    public BigDecimal aplicar(Conta conta) {
+        if (conta == null) {
+            throw new IllegalArgumentException("A conta nao pode ser nula.");
+        }
+
+        return getValor().negate();
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public LocalDate getData() {
-        return data;
-    }
-
-    public void setData(LocalDate data) {
-        this.data = data;
-    }
-
-    public BigDecimal getValor() {
-        return valor;
-    }
-
-    public void setValor(BigDecimal valor) {
-        this.valor = valor;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public Categoria getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(Categoria categoria) {
-        this.categoria = categoria;
+    @Override
+    public String getTipo() {
+        return "DESPESA";
     }
 }
