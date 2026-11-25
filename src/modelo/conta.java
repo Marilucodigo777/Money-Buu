@@ -266,6 +266,55 @@ public class Conta {
         buscarEnvelope(idEnvelope).retirarValor(valor);
     }
 
+    // ---------------- Carregamento do arquivo (Entrega 3) ----------------
+
+    /**
+     * Usado só pelo RepositorioJson ao ler o dados.json.
+     * Não confere saldo, porque os dados já foram validados quando foram criados;
+     * conferir de novo poderia dar erro falso dependendo da ordem de leitura.
+     * No caso da transferência, o repositório chama este método nas duas contas.
+     */
+    public void carregarTransacao(Transacao t) {
+        if (t == null) {
+            throw new IllegalArgumentException("Transação não pode ser nula.");
+        }
+        if (t instanceof Transferencia tr && tr.getOrigem() != this && tr.getDestino() != this) {
+            throw new TransferenciaInvalidaException(
+                    "A transferência #" + t.getId() + " não envolve a conta " + nome + ".");
+        }
+        for (Transacao existente : transacoes) {
+            if (existente.getId() == t.getId()) {
+                throw new IllegalArgumentException(
+                        "A conta " + nome + " já tem uma transação com id #" + t.getId() + ".");
+            }
+        }
+        transacoes.add(t);
+    }
+
+    /** Usado só pelo RepositorioJson: recoloca um envelope salvo, sem conferir saldo. */
+    public void carregarEnvelope(Envelope envelope) {
+        if (envelope == null) {
+            throw new IllegalArgumentException("Envelope não pode ser nulo.");
+        }
+        for (Envelope e : envelopes) {
+            if (e.getId() == envelope.getId()) {
+                throw new IllegalArgumentException(
+                        "A conta " + nome + " já tem um envelope com id #" + envelope.getId() + ".");
+            }
+        }
+        envelopes.add(envelope);
+    }
+
+    /** true se a conta tem alguma transferência com outra conta. */
+    public boolean temTransferencias() {
+        for (Transacao t : transacoes) {
+            if (t instanceof Transferencia) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ---------------- Getters / Setters ----------------
 
     public int getId() {
@@ -302,4 +351,3 @@ public class Conta {
                 id, nome, Moeda.formatar(calcularSaldo()), Moeda.formatar(calcularSaldoDisponivel()));
     }
 }
-
