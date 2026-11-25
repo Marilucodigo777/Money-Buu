@@ -12,6 +12,9 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import persistencia.DadosMoneyBuu;
+import persistencia.RepositorioJson;
+import excecoes.ArquivoDadosException;
 import excecoes.ContaNaoEncontradaException;
 import excecoes.SaldoInsuficienteException;
 import excecoes.TransacaoNaoEncontradaException;
@@ -40,14 +43,64 @@ public class Menu {
     private final List<Conta> contas = new ArrayList<>();
     private final List<Categoria> categorias = new ArrayList<>();
     private int proximoIdCategoria = 1;
+    private final RepositorioJson repositorio;
 
     public static void main(String[] args) {
         new Menu().executar();
     }
 
     public Menu() {
-        for (String nome : List.of("Salário", "Alimentação", "Moradia", "Transporte", "Lazer", "Saúde", "Outros")) {
-            categorias.add(new Categoria(proximoIdCategoria++, nome));
+        this(new RepositorioJson()); // dados.json na pasta onde o programa roda
+    }
+
+    /** Sobrecarga: permite escolher outro arquivo (útil para testes). */
+    public Menu(RepositorioJson repositorio) {
+        this.repositorio = repositorio;
+        carregarDados();
+    }
+
+    // =============== Persistência (Entrega 3) ===============
+
+    /** Lê o dados.json ao abrir o programa. Se não existir, começa vazio com as categorias padrão. */
+    private void carregarDados() {
+        try {
+            DadosMoneyBuu dados = repositorio.carregar();
+            contas.addAll(dados.contas());
+            categorias.addAll(dados.categorias());
+            if (!dados.estaVazio()) {
+                System.out.println("Dados carregados de " + repositorio.getArquivo()
+                        + " (" + contas.size() + " conta(s)).");
+            }
+        } catch (ArquivoDadosException e) {
+            System.out.println("[Erro ao ler os dados] " + e.getMessage());
+            try {
+                System.out.println("Uma cópia do arquivo foi guardada em " + repositorio.fazerBackup()
+                        + ". O programa vai começar sem dados.");
+            } catch (ArquivoDadosException erroBackup) {
+                System.out.println("[Erro] " + erroBackup.getMessage());
+            }
+            contas.clear();
+            categorias.clear();
+        }
+
+        if (categorias.isEmpty()) {
+            for (String nome : List.of("Salário", "Alimentação", "Moradia", "Transporte", "Lazer", "Saúde", "Outros")) {
+                categorias.add(new Categoria(proximoIdCategoria++, nome));
+            }
+        }
+        for (Categoria c : categorias) {
+            if (c.getId() >= proximoIdCategoria) {
+                proximoIdCategoria = c.getId() + 1; // evita repetir id de categoria depois de carregar
+            }
+        }
+    }
+
+    /** Grava tudo no dados.json. Chamado depois de cada operação do menu. */
+    private void salvarDados() {
+        try {
+            repositorio.salvar(contas, categorias);
+        } catch (ArquivoDadosException e) {
+            System.out.println("[Erro ao salvar] " + e.getMessage());
         }
     }
 
@@ -75,6 +128,7 @@ public class Menu {
                         case 9 -> menuEnvelopes();
                         case 10 -> relatorioDoMes();
                         case 11 -> menuCategorias();
+                        case 12 -> excluirConta();
                         case 0 -> rodando = false;
                         default -> System.out.println("Opção inválida.");
                     }
@@ -85,10 +139,16 @@ public class Menu {
                 } catch (IllegalArgumentException e) {
                     System.out.println("[Erro] " + e.getMessage());
                 }
+                // Grava depois de cada operação (mesmo se deu erro no meio, como um envelope criado
+                // antes de uma exceção no submenu), para nada se perder se o programa fechar.
+                if (opcao >= 1 && opcao <= 12) {
+                    salvarDados();
+                }
             }
         } catch (NoSuchElementException e) {
             // a entrada acabou (ex.: Ctrl+D): sai normalmente
         }
+        salvarDados();
         System.out.println("\nAté mais! 👻💰");
     }
 
@@ -105,6 +165,7 @@ public class Menu {
         System.out.println(" 9 - Envelopes");
         System.out.println("10 - Relatório do mês");
         System.out.println("11 - Categorias");
+        System.out.println("12 - Excluir conta");
         System.out.println(" 0 - Sair");
     }
 
@@ -128,6 +189,29 @@ public class Menu {
         for (Conta c : contas) {
             System.out.printf("#%d - %-20s Saldo: %-14s Disponível: %s%n",
                     c.getId(), c.getNome(), dinheiro(c.calcularSaldo()), dinheiro(c.calcularSaldoDisponivel()));
+        }
+    }
+
+    /**
+     * Exclui uma conta depois de pedir confirmação.
+     * Pela composição, os envelopes da conta somem junto com ela.
+     * Contas com transferências não podem ser excluídas, pois a outra conta ficaria
+     * com uma transferência apontando para uma conta que não existe mais.
+     */
+    private void excluirConta() {
+        System.out.println("== Excluir conta ==");
+        Conta conta = escolherConta("Id da conta que quer excluir: ");
+        if (conta.temTransferencias()) {
+            throw new TransferenciaInvalidaException("A conta " + conta.getNome()
+                    + " tem transferências com outras contas. Exclua essas transferências antes (opção 8).");
+        }
+        System.out.println("Atenção: serão apagadas " + conta.getTransacoes().size() + " transação(ões) e "
+                + conta.getEnvelopes().size() + " envelope(s) desta conta.");
+        if (lerSimNao("Tem certeza que quer excluir a conta \"" + conta.getNome() + "\"? (s/n): ")) {
+            contas.remove(conta);
+            System.out.println("Conta excluída.");
+        } else {
+            System.out.println("Nada foi excluído.");
         }
     }
 
@@ -527,4 +611,3 @@ public class Menu {
         return MOEDA.format(valor);
     }
 }
-
