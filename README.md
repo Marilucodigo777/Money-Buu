@@ -117,15 +117,20 @@ Money-Buu/
 │       ├── TransacaoNaoEcontradaException.java
 │       ├── ValorInvalidoException.java
 │       ├── TransferenciaInvalidaException.java
+        ├── ArquivosDadosException.java
+├── persistencia/
+│   ├── DadosMoneyBuu.java
+│   ├── Json.java
+│   ├── RepositorioJson.java
 ├── README.md
 └── .gitignore
 ```
 
 - `modelo`: classes e regras de negócio.
-- `arquivo`: leitura e gravação dos dados JSON.
 - `gui`: interface gráfica desenvolvida com Swing.
 - `app`: inicialização e integração da aplicação.
 - `docs`: diagramas, protótipos e documentação acadêmica.
+- `persistencia`: Arquivos de persistencia json.
 
 ## 📅 Cronograma
 
@@ -134,10 +139,11 @@ Money-Buu/
 | 1 | Modelagem UML, relacionamentos, armazenamento e protótipos | 06/11/2026 |
 | 2 | Implementação das classes e regras de negócio | 19/11/2026 |
 | 3 | Persistência dos dados e funcionalidades principais | 27/11/2026 |
-| 4 | Aplicação completa, documentação e apresentação | 27/12/2026 |
+| 4 | Aplicação completa, documentação e apresentação | 02/12/2026 |
 
 **Etapa Realizada:** Entrega 1 — Modelagem.
-**Etapa Atual:** Entrega 2 - Núcleo do domínio;
+**Etapa Realizada:** Entrega 2 - Núcleo do domínio;
+**Etapa Atual:** Entrega 3 - Persistência de dados
 
 ## 👥 Equipe
 
